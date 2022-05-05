@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import blank from "../asset/images/blank.png";
 import blue from "../asset/images/blue-candy.png";
 import orange from "../asset/images/orange-candy.png";
@@ -22,6 +22,26 @@ const Board = () => {
     }
     return setAllCandy(allCandy);
   };
+  const matchFourCandyColumn = () => {
+    for (let i = 0; i <= 39; i++) {
+      const currentColor = allCandy[i];
+      const matchinCandyIndexes = [
+        i,
+        i + BorardWidth,
+        i + BorardWidth * 2,
+        i + BorardWidth * 3,
+      ];
+      const isBlank = allCandy[i] === blank;
+      const isMatch = matchinCandyIndexes.every(
+        (index) => allCandy[index] === currentColor
+      );
+      if (isMatch && !isBlank) {
+        matchinCandyIndexes.forEach((index) => (allCandy[index] = blank));
+        setAllCandy([...allCandy]);
+        return true;
+      }
+    }
+  };
 
   const dragHandler = (e) => {
     setDraggedCandy(e.target);
@@ -41,12 +61,15 @@ const Board = () => {
       draggedCandyIndex + BorardWidth,
       draggedCandyIndex - BorardWidth,
     ];
+    const isColumnMatch = matchFourCandyColumn();
     const isValidMove = validMoves.includes(dropCandyIndex);
     if (isValidMove && !isBlank) {
       allCandy[draggedCandyIndex] = allCandy[dropCandyIndex];
       allCandy[dropCandyIndex] = drag;
-      setDraggedCandy(null);
-      setDropCandy(null);
+      if (isColumnMatch) {
+        setDraggedCandy(null);
+        setDropCandy(null);
+      }
     } else {
       allCandy[draggedCandyIndex] = drag;
       allCandy[dropCandyIndex] = allCandy[dropCandyIndex];
@@ -55,6 +78,12 @@ const Board = () => {
   useEffect(() => {
     createBoard();
   }, []);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      matchFourCandyColumn();
+    }, 100);
+    return () => clearInterval(interval);
+  }, [matchFourCandyColumn]);
 
   return (
     <div className="board">
