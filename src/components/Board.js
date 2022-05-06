@@ -42,6 +42,61 @@ const Board = () => {
       }
     }
   };
+  const matchThreeCandyColumn = () => {
+    for (let i = 0; i <= 47; i++) {
+      const matchCandyIndexes = [i, i + BorardWidth, i + BorardWidth * 2];
+      const currentColor = allCandy[i];
+      const isBlank = currentColor === blank;
+      const isMatch = matchCandyIndexes.every(
+        (index) => allCandy[index] === currentColor
+      );
+      if (!isBlank && isMatch) {
+        matchCandyIndexes.forEach((ind) => (allCandy[ind] = blank));
+        setAllCandy([...allCandy]);
+        return true;
+      }
+    }
+  };
+
+  const matchFourCandyRow = () => {
+    for (let i = 0; i < 63; i++) {
+      const invalidIndexes = [
+        5, 6, 7, 13, 14, 15, 21, 22, 23, 29, 30, 31, 37, 38, 39, 45, 46, 47, 53,
+        54, 55, 62, 63,
+      ];
+      if (invalidIndexes.includes(i)) continue;
+      const currentColor = allCandy[i];
+      let matchCandyIndexes = [i, i + 1, i + 2, i + 3];
+      const isBlank = allCandy[i] === blank;
+      const isMatch = matchCandyIndexes.every(
+        (ind) => allCandy[ind] === currentColor
+      );
+      if (!isBlank && isMatch) {
+        matchCandyIndexes.forEach((ind) => (allCandy[ind] = blank));
+        setAllCandy([...allCandy]);
+        return true;
+      }
+    }
+  };
+  const matchThreeCandyRow = () => {
+    for (let i = 0; i < 63; i++) {
+      const invalidIndexes = [
+        6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47, 54, 55, 63,
+      ];
+      const matchThreeCandy = [i, i + 1, i + 2];
+      const currentColor = allCandy[i];
+      const isBlank = currentColor === blank;
+      if (invalidIndexes.includes(i)) continue;
+      const isMatch = matchThreeCandy.every(
+        (index) => allCandy[index] === currentColor
+      );
+      if (!isBlank && isMatch) {
+        matchThreeCandy.forEach((ind) => (allCandy[ind] = blank));
+        setAllCandy([...allCandy]);
+        return true;
+      }
+    }
+  };
 
   const dragHandler = (e) => {
     setDraggedCandy(e.target);
@@ -61,12 +116,20 @@ const Board = () => {
       draggedCandyIndex + BorardWidth,
       draggedCandyIndex - BorardWidth,
     ];
-    const isColumnMatch = matchFourCandyColumn();
+    const isColumnFourMatch = matchFourCandyColumn();
+    const isColumnThreeMatch = matchThreeCandyColumn();
+    const isRowOfFourMatch = matchFourCandyRow();
+    const isRowOfThreeMatch = matchThreeCandyRow();
     const isValidMove = validMoves.includes(dropCandyIndex);
     if (isValidMove && !isBlank) {
       allCandy[draggedCandyIndex] = allCandy[dropCandyIndex];
       allCandy[dropCandyIndex] = drag;
-      if (isColumnMatch) {
+      if (
+        isColumnFourMatch ||
+        isColumnThreeMatch ||
+        isRowOfFourMatch ||
+        isRowOfThreeMatch
+      ) {
         setDraggedCandy(null);
         setDropCandy(null);
       }
@@ -74,6 +137,7 @@ const Board = () => {
       allCandy[draggedCandyIndex] = drag;
       allCandy[dropCandyIndex] = allCandy[dropCandyIndex];
     }
+    setAllCandy([...allCandy]);
   };
   useEffect(() => {
     createBoard();
@@ -81,9 +145,17 @@ const Board = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       matchFourCandyColumn();
+      matchThreeCandyColumn();
+      matchFourCandyRow();
+      matchThreeCandyRow();
     }, 100);
     return () => clearInterval(interval);
-  }, [matchFourCandyColumn]);
+  }, [
+    matchFourCandyColumn,
+    matchThreeCandyColumn,
+    matchFourCandyRow,
+    matchThreeCandyRow,
+  ]);
 
   return (
     <div className="board">
