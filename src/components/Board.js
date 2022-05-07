@@ -108,6 +108,7 @@ const Board = () => {
     const draggedCandyIndex = parseInt(draggedCandy.getAttribute("data-id"));
     const dropCandyIndex = parseInt(dropCandy.getAttribute("data-id"));
     let drag = allCandy[draggedCandyIndex];
+    let drop = allCandy[dropCandyIndex];
     const isBlank = drag === blank;
 
     const validMoves = [
@@ -116,26 +117,28 @@ const Board = () => {
       draggedCandyIndex + BorardWidth,
       draggedCandyIndex - BorardWidth,
     ];
+
+    const isValidMove = validMoves.includes(dropCandyIndex);
+    allCandy[draggedCandyIndex] = allCandy[dropCandyIndex];
+    allCandy[dropCandyIndex] = drag;
     const isColumnFourMatch = matchFourCandyColumn();
     const isColumnThreeMatch = matchThreeCandyColumn();
     const isRowOfFourMatch = matchFourCandyRow();
     const isRowOfThreeMatch = matchThreeCandyRow();
-    const isValidMove = validMoves.includes(dropCandyIndex);
-    if (isValidMove && !isBlank) {
-      allCandy[draggedCandyIndex] = allCandy[dropCandyIndex];
-      allCandy[dropCandyIndex] = drag;
-      if (
-        isColumnFourMatch ||
+    if (
+      isValidMove &&
+      !isBlank &&
+      (isColumnFourMatch ||
         isColumnThreeMatch ||
         isRowOfFourMatch ||
-        isRowOfThreeMatch
-      ) {
-        setDraggedCandy(null);
-        setDropCandy(null);
-      }
+        isRowOfThreeMatch)
+    ) {
+      setDraggedCandy(null);
+      setDropCandy(null);
+      setAllCandy([...allCandy]);
     } else {
       allCandy[draggedCandyIndex] = drag;
-      allCandy[dropCandyIndex] = allCandy[dropCandyIndex];
+      allCandy[dropCandyIndex] = drop;
     }
     setAllCandy([...allCandy]);
   };
@@ -144,6 +147,7 @@ const Board = () => {
   }, []);
   useEffect(() => {
     const interval = setInterval(() => {
+      console.log();
       matchFourCandyColumn();
       matchThreeCandyColumn();
       matchFourCandyRow();
