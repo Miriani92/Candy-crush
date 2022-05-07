@@ -97,6 +97,22 @@ const Board = () => {
       }
     }
   };
+  //if we are on the first line than create first need to notice wheteher we are fitst line or not
+  //
+
+  const createCandys = () => {
+    for (let i = 0; i < 63; i++) {
+      const FirstLine = [0, 1, 2, 3, 4, 5, 6, 7];
+      if (allCandy[i + BorardWidth] === blank && allCandy[i] !== blank) {
+        allCandy[i + BorardWidth] = allCandy[i];
+        allCandy[i] = blank;
+        setAllCandy([...allCandy]);
+      } else if (FirstLine.includes(i) && allCandy[i] === blank) {
+        allCandy[i] = candys[Math.floor(Math.random() * candys.length)];
+        setAllCandy([...allCandy]);
+      }
+    }
+  };
 
   const dragHandler = (e) => {
     setDraggedCandy(e.target);
@@ -152,6 +168,7 @@ const Board = () => {
       matchThreeCandyColumn();
       matchFourCandyRow();
       matchThreeCandyRow();
+      createCandys();
     }, 100);
     return () => clearInterval(interval);
   }, [
